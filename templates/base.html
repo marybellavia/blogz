@@ -5,9 +5,14 @@
         <style>
         .centered {
             text-align: center;
+            color: olivedrab;
         }
         .blogg {
             font-family: Arial, Helvetica, sans-serif;
+            color: steelblue;
+        }
+        .error {
+            color: indianred;
         }
         </style>
     </head>
@@ -23,7 +28,7 @@
         {% with messages = get_flashed_messages() %}
             <ul>
             {% for message in messages %}
-                <li>{{ message }}</li>
+                <li class='error'>{{ message }}</li>
             {% endfor %}
             </ul>
         {% endwith %}
