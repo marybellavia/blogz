@@ -36,15 +36,21 @@ def newpost():
         else:
             db.session.add(new_blog)
             db.session.commit()
-            return redirect('/')
-        # TODO create redirect to new page displaying blog via blog id?
-
+            new_blog_id = new_blog.id
+            return redirect('./blog?id={0}'.format(new_blog_id))
     
     return render_template('newpost.html', title="Add a Blog Entry", title_error=title_error, body_error=body_error)
 
 @app.route('/blog', methods=['POST', 'GET'])
 def blog():
-    return render_template('blog.html', title="Build a Blog", bloglist=get_blogs())
+    blog_id = request.args.get('id')
+    if blog_id != None:
+        blog_object = Blog.query.get(blog_id)
+        title = blog_object.title
+        body = blog_object.body
+        return render_template('posting.html', title=title, body=body)
+    else:
+        return render_template('blog.html', title="Build a Blog", bloglist=get_blogs())
 
 @app.route('/', methods=['GET'])
 def index():
