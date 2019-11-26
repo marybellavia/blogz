@@ -10,9 +10,14 @@ db = SQLAlchemy(app)
 class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     blog_title = db.Column(db.String(120))
+    blog_content = db.Column(db.String(255))
 
     def __init__(self,blog_title):
         self.blog_title = blog_title
+
+@app.route('/add-blog', methods=['POST', 'GET'])
+def add_blog():
+    return render_template('add_blog.html', title="Add a Blog Entry")
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
