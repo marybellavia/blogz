@@ -10,30 +10,31 @@ db = SQLAlchemy(app)
 class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120))
-    content = db.Column(db.String(120)) # TODO update this to be a longer amount of characters for blog content
+    body = db.Column(db.String(1000)) # TODO update this to be a longer amount of characters for blog body
 
-    def __init__(self, title, content):
+    def __init__(self, title, body):
         self.title = title
-        self.content = content
+        self.body = body
 
 def get_blogs():
     return Blog.query.all()
 
-@app.route('/add-blog', methods=['POST', 'GET'])
-def add_blog():
+@app.route('/newpost', methods=['POST', 'GET'])
+def newpost():
     if request.method == 'POST':
         # TODO add error messages for if they leave either field blank
 
         new_blog_title = request.form['blog-title']
-        new_blog_content = request.form['blog-content']
-        new_blog = Blog(new_blog_title, new_blog_content)
+        new_blog_body = request.form['blog-body']
+        new_blog = Blog(new_blog_title, new_blog_body)
         db.session.add(new_blog)
         db.session.commit()
         
+        return redirect('/')
         # TODO create redirect to new page displaying blog via blog id?
 
     
-    return render_template('add-blog.html', title="Add a Blog Entry")
+    return render_template('newpost.html', title="Add a Blog Entry")
 
 @app.route('/blog', methods=['POST', 'GET'])
 def blog():
