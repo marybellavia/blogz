@@ -22,24 +22,25 @@ def get_blogs():
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
+    title_error = ''
+    body_error = ''
     if request.method == 'POST':
         new_blog_title = request.form['blog-title']
         new_blog_body = request.form['blog-body']
         new_blog = Blog(new_blog_title, new_blog_body)
 
-        if new_blog_title == '' or new_blog_body == '':
-            flash('That is not a valid blog title or blog body.')
-            return redirect('/newpost')
+        if new_blog_title == '':
+            title_error = 'Please fill in the title'
+        if new_blog_body == '':
+            body_error = 'Please fill in the body'
         else:
             db.session.add(new_blog)
             db.session.commit()
-
-        # TODO add error messages for if they leave either field blank
             return redirect('/')
         # TODO create redirect to new page displaying blog via blog id?
 
     
-    return render_template('newpost.html', title="Add a Blog Entry")
+    return render_template('newpost.html', title="Add a Blog Entry", title_error=title_error, body_error=body_error)
 
 @app.route('/blog', methods=['POST', 'GET'])
 def blog():

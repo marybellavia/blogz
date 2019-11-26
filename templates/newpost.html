@@ -6,14 +6,20 @@
         <label for="blog-title">Title for your new blog:</label>
         <br>
         <input type="text" name="blog-title">
+        {% if title_error != '' %}
+        <p class='error'><em>{{ title_error }}</em></p>
+        {% endif %}
     </span>
     <br><br>
     <span>
         <label for="blog-body">Your new blog:</label>
         <br>
         <textarea rows=20 cols= 100 name="blog-body"></textarea>
-        <br>
+        {% if body_error != '' %}
+            <p class='error'><em>{{ body_error }}</em></p>
+        {% endif %}
     </span>
+    <br><br>
     <input type="submit" value="Add Entry">
 </form>
 
