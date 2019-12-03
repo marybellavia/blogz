@@ -35,18 +35,23 @@ def get_blogs():
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+    username_error = ''
+    password_error = ''
+    username = ''
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
         if user and user.password == password:
             session['user'] = username
-            flash("Logged in")
-            return redirect('/')
+            return redirect('/newpost')
         else:
-            flash('User password incorrect, or user does not exist.', 'error')
+            if not user:
+                username_error = 'Username does not exist'
+            elif password != user.password:
+                password_error = 'Username and password do not match.'
 
-    return render_template('login.html')
+    return render_template('login.html', password_error=password_error, username_error=username_error, username=username)
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
