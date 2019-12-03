@@ -53,6 +53,36 @@ def login():
 
     return render_template('login.html', password_error=password_error, username_error=username_error, username=username)
 
+@app.route('/signup', methods=['POST', 'GET'])
+def signup():
+    username_error = ''
+    password_error = ''
+    verify_error = ''
+    username = ''
+
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        verify = request.form['verify']
+        existing_user = User.query.filter_by(username=username).first()
+
+        if existing_user:
+            username_error = "A user with that username already exists!"
+        elif verify != password:
+            verify_error = "Those passwords don't match."
+        elif username == '' or len(username) < 3:
+            username_error = "You must enter a valid username (usernames must be more than 3 characters long)."
+        elif password == '' or len(password) < 3:
+            password_error = "You must enter a valid password (passwords must be more than 3 characters long)."
+        elif not existing_user and verify == password:
+            new_user = User(username, password)
+            db.session.add(new_user)
+            db.session.commit()
+            session['username'] = username
+            return redirect('/newpost')
+
+    return render_template('signup.html', username_error=username_error, password_error=password_error, verify_error=verify_error, username=username)
+
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
     # setting my errors to nothing
