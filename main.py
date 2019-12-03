@@ -30,8 +30,20 @@ class User(db.Model):
         self.username = username
         self.password = password
 # helper function to query database for all blogs
-def get_blogs():
+def get_all_blogs():
     return Blog.query.all()
+
+@app.before_request
+def require_login():
+    allowed_routes = ['login', 'signup', 'blog', 'home']
+    # print(session)
+    if request.endpoint not in allowed_routes and 'username' not in session:
+        return redirect('/login')
+
+@app.route('/logout')
+def logout():
+    del session['username']
+    return redirect('/blog')
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -43,7 +55,7 @@ def login():
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
         if user and user.password == password:
-            session['user'] = username
+            session['username'] = username
             return redirect('/newpost')
         else:
             if not user:
@@ -108,7 +120,6 @@ def newpost():
     # returns the blank form on GET request
     return render_template('newpost.html', title="Add a Blog Entry", title_error=title_error, body_error=body_error)
 
-@app.route('/')
 @app.route('/blog', methods=['POST', 'GET'])
 def blog():
     # getting id parameter from GET request, if there is an id parameter
@@ -121,7 +132,11 @@ def blog():
         return render_template('posting.html', title=title, body=body)
     # returning just the main page template
     else:
-        return render_template('blog.html', title="Build a Blog", bloglist=get_blogs())
+        return render_template('blog.html', title="Blogz", bloglist=get_blogs())
+
+@app.route('/')
+def home():
+    return render_template('index.html')
 
 # makin that shit run!
 if __name__ == '__main__':
