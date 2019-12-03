@@ -1,5 +1,5 @@
 # importing required modules
-from flask import Flask, request, redirect, render_template, session
+from flask import Flask, request, redirect, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
 # setting up Flask and linking to database
 app = Flask(__name__)
@@ -7,6 +7,7 @@ app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:password@localhost:8889/blogz'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
+app.secret_key = 'thesmellofdogfartslingerintheair'
 # creating Blog class to create database entries -- need title, body, owner
 class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -31,6 +32,21 @@ class User(db.Model):
 # helper function to query database for all blogs
 def get_blogs():
     return Blog.query.all()
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+        if user and user.password == password:
+            session['user'] = username
+            flash("Logged in")
+            return redirect('/')
+        else:
+            flash('User password incorrect, or user does not exist.', 'error')
+
+    return render_template('login.html')
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
