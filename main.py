@@ -1,7 +1,8 @@
 # importing required modules
 from flask import Flask, request, redirect, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
-# setting up Flask and linking to database
+from hashutils import make_pw_hash, check_pw_hash
+# setting up Flask, linking to database, setting secret key
 app = Flask(__name__)
 app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:password@localhost:8889/blogz'
@@ -23,26 +24,25 @@ class Blog(db.Model):
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120))
-    password = db.Column(db.String(30))
+    pw_hash = db.Column(db.String(255))
     blogs = db.relationship('Blog', backref='owner')
 
     def __init__(self, username, password):
         self.username = username
-        self.password = password
+        self.pw_hash = make_pw_hash(password)
 # helper function to query database for all blogs
 def get_all_blogs():
     return Blog.query.all()
 # helper function to query database for all usernames
 def get_all_usernames():
     return User.query.all()
-
+# route to require login if you want to create a new blog post
 @app.before_request
 def require_login():
     allowed_routes = ['login', 'signup', 'blog', 'index']
-    # print(session)
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
-
+# 
 @app.route('/logout')
 def logout():
     del session['username']
@@ -57,13 +57,13 @@ def login():
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
-        if user and user.password == password:
+        if user and check_pw_hash(password, user.pw_hash):
             session['username'] = username
             return redirect('/newpost')
         else:
             if not user:
                 username_error = 'Username does not exist'
-            elif password != user.password:
+            elif not check_pw_hash(password, user.pw_hash):
                 password_error = 'Username and password do not match.'
 
     return render_template('login.html', password_error=password_error, username_error=username_error, username=username)

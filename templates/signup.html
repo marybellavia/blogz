@@ -2,23 +2,23 @@
 
 {% block content %}
 
-<h1>Signup</h1>
+<h1 class="title">Signup</h1>
 
 <form method="POST" action='/signup'>
     <table>
         <tr>
-            <td><label for="username">Username</label></td>
-            <td><input type="text" name="username" value="{{ username }}""></td>
+            <td><label for="username" class="post-body">Username</label></td>
+            <td><input type="text" name="username" value="{{ username }}"" class="post-body"></td>
             <td class='error'>{{ username_error }}</td>
         </tr>
         <tr>
-            <td><label for="password">Password</label></td>
-            <td><input type="password" name="password"></td>
+            <td><label for="password" class="post-body">Password</label></td>
+            <td><input type="password" name="password" class="post-body"></td>
             <td class='error'>{{ password_error }}</td>
         </tr>
         <tr>
-            <td><label for="verify">Verify Password</label></td>
-            <td><input type="password" name="verify"></td>
+            <td><label for="verify" class="post-body">Verify Password</label></td>
+            <td><input type="password" name="verify" class="post-body"></td>
             <td class='error'>{{ verify_error }}</td>
         </tr>
         <tr>
