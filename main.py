@@ -122,10 +122,10 @@ def newpost():
             return redirect('./blog?id={0}'.format(new_blog_id))
     # returns the blank form on GET request
     return render_template('newpost.html', title="Add a Blog Entry", title_error=title_error, body_error=body_error)
-
+# blog route; 
 @app.route('/blog', methods=['POST', 'GET'])
 def blog():
-    # getting id parameter from GET request, if there is an id parameter
+    # grabbing id & user parameter from GET request, if present
     blog_id = request.args.get('id')
     user_id = request.args.get('user')
     # conditional returning just the posting if there is an id parameter
@@ -135,23 +135,22 @@ def blog():
         body = blog_object.body
         owner_id = blog_object.owner_id
         user_object = User.query.get(owner_id)
-        return render_template('posting.html', title=title, body=body, blog=blog_object, user=user_object)
+        return render_template('blogpost.html', title=title, body=body, blog_object=blog_object, user_object=user_object)
+    # conditional returning the list of posts by a specific username if there is a user parameter
     if user_id != None:
         user_object = User.query.get(user_id)
-        username = user_object.username
         user_blogs = Blog.query.filter_by(owner_id=user_id).all()
-        return render_template('userblogs.html', title='Blogz', bloglist=user_blogs, username=username)
-
+        return render_template('userblogs.html', title='Blogz', bloglist=user_blogs, user_object=user_object)
     # returning just the main page template
     else:
         bloglist = get_all_blogs()
         userlist = get_all_usernames()
         return render_template('blog.html', title="Blogz", bloglist=bloglist, userlist=userlist)
-
+# home/index route; lists all the usernames
 @app.route('/')
 def index():
     username_list = get_all_usernames()
-    return render_template('index.html', username_list=username_list)
+    return render_template('index.html', username_list=username_list, title="Blogz")
 
 # makin that shit run!
 if __name__ == '__main__':

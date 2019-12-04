@@ -3,7 +3,7 @@
 {% block content %}
 <ul>
     {% for username in username_list %}
-    <li><a href="./blog?user={{username.id}}">{{ username.username }}</a></li>
+    <li><a href="./blog?user={{username.id}}" class="post-body">{{ username.username }}</a></li>
     {% endfor %}
 </ul>
 
