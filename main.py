@@ -32,10 +32,13 @@ class User(db.Model):
 # helper function to query database for all blogs
 def get_all_blogs():
     return Blog.query.all()
+# helper function to query database for all usernames
+def get_all_usernames():
+    return User.query.all()
 
 @app.before_request
 def require_login():
-    allowed_routes = ['login', 'signup', 'blog', 'home']
+    allowed_routes = ['login', 'signup', 'blog', 'index']
     # print(session)
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
@@ -104,7 +107,7 @@ def newpost():
     if request.method == 'POST':
         new_blog_title = request.form['blog-title']
         new_blog_body = request.form['blog-body']
-        owner = User.query.filter_by(email=session['email']).first()
+        owner = User.query.filter_by(username=session['username']).first()
         new_blog = Blog(new_blog_title, new_blog_body, owner)
         # conditionals to insert error messages if the form is left blank
         if new_blog_title == '':
@@ -124,19 +127,31 @@ def newpost():
 def blog():
     # getting id parameter from GET request, if there is an id parameter
     blog_id = request.args.get('id')
+    user_id = request.args.get('user')
     # conditional returning just the posting if there is an id parameter
     if blog_id != None:
         blog_object = Blog.query.get(blog_id)
         title = blog_object.title
         body = blog_object.body
-        return render_template('posting.html', title=title, body=body)
+        owner_id = blog_object.owner_id
+        user_object = User.query.get(owner_id)
+        return render_template('posting.html', title=title, body=body, blog=blog_object, user=user_object)
+    if user_id != None:
+        user_object = User.query.get(user_id)
+        username = user_object.username
+        user_blogs = Blog.query.filter_by(owner_id=user_id).all()
+        return render_template('userblogs.html', title='Blogz', bloglist=user_blogs, username=username)
+
     # returning just the main page template
     else:
-        return render_template('blog.html', title="Blogz", bloglist=get_blogs())
+        bloglist = get_all_blogs()
+        userlist = get_all_usernames()
+        return render_template('blog.html', title="Blogz", bloglist=bloglist, userlist=userlist)
 
 @app.route('/')
-def home():
-    return render_template('index.html')
+def index():
+    username_list = get_all_usernames()
+    return render_template('index.html', username_list=username_list)
 
 # makin that shit run!
 if __name__ == '__main__':
