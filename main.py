@@ -42,24 +42,28 @@ def require_login():
     allowed_routes = ['login', 'signup', 'blog', 'index']
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
-# 
+# lougout route -- redirects to listing of all blog posts
 @app.route('/logout')
 def logout():
     del session['username']
     return redirect('/blog')
-
+# login route
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+    # setting error variables plus username so the typed in username will remain if error occurs
     username_error = ''
     password_error = ''
     username = ''
+    # conditional for once user submits form
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
+        # conditional for if the username and password are correct using hashing
         if user and check_pw_hash(password, user.pw_hash):
             session['username'] = username
             return redirect('/newpost')
+        # else with errors
         else:
             if not user:
                 username_error = 'Username does not exist'
@@ -67,9 +71,10 @@ def login():
                 password_error = 'Username and password do not match.'
 
     return render_template('login.html', password_error=password_error, username_error=username_error, username=username)
-
+# sign up route
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
+    # setting error variables plus username so the typed in username will remain if error occurs
     username_error = ''
     password_error = ''
     verify_error = ''
@@ -140,17 +145,17 @@ def blog():
     if user_id != None:
         user_object = User.query.get(user_id)
         user_blogs = Blog.query.filter_by(owner_id=user_id).all()
-        return render_template('userblogs.html', title='Blogz', bloglist=user_blogs, user_object=user_object)
+        return render_template('userblogs.html', title='Blogz by Uzer', bloglist=user_blogs, user_object=user_object)
     # returning just the main page template
     else:
         bloglist = get_all_blogs()
         userlist = get_all_usernames()
-        return render_template('blog.html', title="Blogz", bloglist=bloglist, userlist=userlist)
+        return render_template('blog.html', title="All Blogz", bloglist=bloglist, userlist=userlist)
 # home/index route; lists all the usernames
 @app.route('/')
 def index():
     username_list = get_all_usernames()
-    return render_template('index.html', username_list=username_list, title="Blogz")
+    return render_template('index.html', username_list=username_list, title="Uzerz")
 
 # makin that shit run!
 if __name__ == '__main__':
