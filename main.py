@@ -79,13 +79,13 @@ def signup():
     password_error = ''
     verify_error = ''
     username = ''
-
+    # conditional for once user submits form
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         verify = request.form['verify']
         existing_user = User.query.filter_by(username=username).first()
-
+        # conditionals for errors
         if existing_user:
             username_error = "A user with that username already exists!"
         elif verify != password:
@@ -94,6 +94,7 @@ def signup():
             username_error = "You must enter a valid username (usernames must be more than 3 characters long)."
         elif password == '' or len(password) < 3:
             password_error = "You must enter a valid password (passwords must be more than 3 characters long)."
+        # final conditional adding new user to database if no errors
         elif not existing_user and verify == password:
             new_user = User(username, password)
             db.session.add(new_user)
@@ -102,7 +103,7 @@ def signup():
             return redirect('/newpost')
 
     return render_template('signup.html', username_error=username_error, password_error=password_error, verify_error=verify_error, username=username)
-
+# creating new post route
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
     # setting my errors to nothing
@@ -127,13 +128,13 @@ def newpost():
             return redirect('./blog?id={0}'.format(new_blog_id))
     # returns the blank form on GET request
     return render_template('newpost.html', title="Add a Blog Entry", title_error=title_error, body_error=body_error)
-# blog route; 
+# blog route; render one of three html templates based on user and blog_id parameters
 @app.route('/blog', methods=['POST', 'GET'])
 def blog():
     # grabbing id & user parameter from GET request, if present
     blog_id = request.args.get('id')
     user_id = request.args.get('user')
-    # conditional returning just the posting if there is an id parameter
+    # conditional returning only the posting if there is an id parameter
     if blog_id != None:
         blog_object = Blog.query.get(blog_id)
         title = blog_object.title
@@ -141,12 +142,12 @@ def blog():
         owner_id = blog_object.owner_id
         user_object = User.query.get(owner_id)
         return render_template('blogpost.html', title=title, body=body, blog_object=blog_object, user_object=user_object)
-    # conditional returning the list of posts by a specific username if there is a user parameter
+    # conditional returning template with list of posts by a specific username if there is a user parameter
     if user_id != None:
         user_object = User.query.get(user_id)
         user_blogs = Blog.query.filter_by(owner_id=user_id).all()
         return render_template('userblogs.html', title='Blogz by Uzer', bloglist=user_blogs, user_object=user_object)
-    # returning just the main page template
+    # returning the main page template of all blogs
     else:
         bloglist = get_all_blogs()
         userlist = get_all_usernames()
@@ -156,7 +157,6 @@ def blog():
 def index():
     username_list = get_all_usernames()
     return render_template('index.html', username_list=username_list, title="Uzerz")
-
 # makin that shit run!
 if __name__ == '__main__':
     app.run()
